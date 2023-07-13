@@ -1,0 +1,55 @@
+name: Build and Test Application
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  IDF_PATH: /opt/esp/idf
+  test_dirs: examples
+
+jobs:
+  build:
+    name: Build Test App
+    strategy:
+      fail-fast: false
+      matrix:
+        # choose the version of ESP-IDF to use for the build
+        idf-branch:
+          # - release-v5.0
+          # - release-v5.1
+          - latest
+        # choose the target to build for
+        target:
+          - esp32
+    runs-on: ubuntu-20.04
+    container:
+      image: espressif/idf:${{ matrix.idf-branch }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Python Dependencies
+        run: |
+          . $IDF_PATH/export.sh
+          python -m pip install idf-build-apps
+      - name: Build Test Application with ESP-IDF
+        run: |
+          . $IDF_PATH/export.sh
+          idf-build-apps build \
+            -p ${{ env.test_dirs }} \
+            --target ${{ matrix.target }} \
+            --recursive \
+            --build-dir build_@t_@w \
+            --config "sdkconfig.ci.*=" "sdkconfig.ci=default" "=default"
+      - name: Upload files to artifacts for run-target job
+        uses: actions/upload-artifact@v3
+        with:
+          name: built_binaries
+          path: |
+            **/build**/bootloader/bootloader.bin
+            **/build**/partition_table/partition-table.bin
+            **/build**/*.bin
+            **/build**/*.elf
+            **/build**/flasher_args.json
+          if-no-files-found: error
