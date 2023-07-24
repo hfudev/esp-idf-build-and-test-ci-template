@@ -2,6 +2,8 @@ name: Build and Test Application
 
 on:
   pull_request:
+    paths:
+      - "src/**/*.c"
   push:
     branches:
       - main
