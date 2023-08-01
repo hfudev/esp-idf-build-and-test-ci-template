@@ -1,4 +1,2 @@
-from pytest_embedded_idf import IdfDut
-
-def test_hello_world(dut: IdfDut) -> None:
+def test_hello_world(dut) -> None:
     dut.expect("Hello, World!")

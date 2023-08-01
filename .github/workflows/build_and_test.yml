@@ -86,7 +86,6 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           pip install \
-            pytest-embedded-serial-esp \
             pytest-embedded-idf \
             pytest-embedded-qemu
       - name: Run Test App on target
